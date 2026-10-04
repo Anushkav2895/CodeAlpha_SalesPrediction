@@ -1,0 +1,75 @@
+Shape: (200, 4)
+Missing values: 0 | duplicate rows: 0
+
+Summary statistics:
+            TV   Radio  Newspaper   Sales
+count  200.00  200.00     200.00  200.00
+mean   147.04   23.26      30.55   14.02
+std     85.85   14.85      21.78    5.22
+min      0.70    0.00       0.30    1.60
+25%     74.38    9.98      12.75   10.38
+50%    149.75   22.90      25.75   12.90
+75%    218.82   36.52      45.10   17.40
+max    296.40   49.60     114.00   27.00
+
+Correlation with Sales:
+ TV           0.782
+Radio        0.576
+Newspaper    0.228
+
+MODEL COMPARISON (sorted by cross-validated R2; MAE/RMSE in thousand units)
+                                       CV R2  CV R2 std  CV MAE  CV RMSE  Test R2  Test MAE
+Model                                                                                     
+Random Forest                         0.978      0.006   0.568    0.744    0.983     0.613
+Gradient Boosting                     0.975      0.009   0.572    0.790    0.982     0.649
+Linear + TV x Radio (TV, Radio only)  0.965      0.013   0.679    0.942    0.974     0.666
+Linear + TV x Radio                   0.964      0.014   0.686    0.951    0.974     0.672
+Ridge (3 channels + interaction)      0.964      0.014   0.683    0.950    0.974     0.676
+Linear (TV + Radio only)              0.883      0.050   1.283    1.698    0.901     1.444
+Linear (3 channels)                   0.881      0.052   1.292    1.711    0.899     1.461
+
+Best model: Random Forest | CV R2 = 0.978 | Test R2 = 0.983 | Test MAE = 0.61 thousand units
+
+======================================================================
+HOW ADVERTISING AFFECTS SALES
+======================================================================
+
+Baseline sales with zero advertising (intercept): 2.94 thousand units
+
+Each extra $1,000 of spend in one channel (others held constant) adds this many thousand units:
+           Effect on sales per +1 (thousand $)  95% CI low  95% CI high
+TV                                       0.046       0.042        0.049
+Radio                                    0.189       0.168        0.209
+Newspaper                               -0.001      -0.012        0.012
+
+A 95% interval that includes 0 means the channel has no reliable effect once TV and radio are accounted for.
+
+======================================================================
+BUDGET SCENARIOS (TV + Radio interaction model)
+======================================================================
+
+Average budget (TV 147k, Radio 23k) -> predicted sales 13.95k units
+  +$10k on TV only                 -> 14.39k units (+0.44k)
+  +$10k on Radio only              -> 15.83k units (+1.89k)
+  +$5k on each of TV and Radio     -> 15.14k units (+1.19k)
+
+Same total TV+Radio budget (170k), splits kept inside the observed spend range (radio <= 50k): best is 71% TV / 29% Radio -> 16.97k units
+The best split sits at the radio limit seen in the data, so the model says 'more radio' but cannot say how far that holds beyond ~50k.
+
+======================================================================
+MARKETING RECOMMENDATIONS
+======================================================================
+
+1. TV and Radio drive sales; Newspaper adds little or nothing once they are
+   accounted for (its raw correlation with sales comes from being correlated
+   with Radio spend). Review or cut newspaper spend.
+2. Each extra $1k on Radio brings a larger lift than $1k on TV, so Radio is the
+   more cost-efficient channel at the margin.
+3. TV and Radio reinforce each other (positive interaction): a mixed budget
+   beats putting everything in one channel.
+4. Shift money from Newspaper toward Radio/TV and track the result.
+5. Limits: only 200 observations, one snapshot (no dates, so no time-series
+   forecast), and no segment/platform data. Test any big budget change in a
+   small experiment before scaling it.
+
+Figures saved in /home/claude/CodeAlpha_SalesPrediction/outputs/figures
